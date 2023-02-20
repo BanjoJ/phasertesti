@@ -16,6 +16,8 @@ var config = {
 
 var game = new Phaser.Game(config);
 
+var credits = 100;
+
 var path;
 var turrets;
 var enemies;
@@ -67,7 +69,8 @@ var Enemy = new Phaser.Class({
             // if hp drops below 0 we deactivate this enemy
             if(this.hp <= 0) {
                 this.setActive(false);
-                this.setVisible(false);      
+                this.setVisible(false); 
+                credits += 5;
             }
         },
         update: function (time, delta)
@@ -106,10 +109,17 @@ var Turret = new Phaser.Class({
             Phaser.GameObjects.Image.call(this, scene, 0, 0, 'sprites', 'turret');
             this.nextTic = 0;
         },
-        place: function(i, j) {            
-            this.y = i * 64 + 64/2;
-            this.x = j * 64 + 64/2;
-            map[i][j] = 1;            
+		place: function(i, j) {
+			if (credits > 9) {
+				this.y = i * 64 + 64/2;
+				this.x = j * 64 + 64/2;
+				map[i][j] = 1;  
+				credits -= 10;
+			}
+			else{
+				this.y = -100;
+				this.x = -100;
+			}           
         },
         fire: function() {
             var enemy = getEnemy(this.x, this.y, 200);
