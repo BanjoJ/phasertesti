@@ -70,7 +70,7 @@ var Enemy = new Phaser.Class({
             if(this.hp <= 0) {
                 this.setActive(false);
                 this.setVisible(false); 
-                credits += 5;
+                updatePoints(5);
             }
         },
         update: function (time, delta)
@@ -88,6 +88,11 @@ var Enemy = new Phaser.Class({
         }
 
 });
+
+function updatePoints(amount) {
+    credits += amount;
+    pointsText.setText('Points: ' + credits);
+}
 
 function getEnemy(x, y, distance) {
     var enemyUnits = enemies.getChildren();
@@ -209,6 +214,9 @@ function create() {
     this.physics.add.overlap(enemies, bullets, damageEnemy);
     
     this.input.on('pointerdown', placeTurret);
+
+    // Generate points text
+    pointsText = this.add.text(10, 10, 'Points: 0', { fontSize: '24px', fill: '#ffffff' });
 }
 
 function damageEnemy(enemy, bullet) {  
