@@ -20,6 +20,9 @@ var credits = 100;
 var pointsText;
 var level = 1;
 
+var sellKey;
+var selectedTurret;
+
 
 var path;
 var turrets;
@@ -121,12 +124,19 @@ var Turret = new Phaser.Class({
         function Turret(scene) {
             Phaser.GameObjects.Image.call(this, scene, 0, 0, 'sprites', 'turret');
             this.nextTic = 0;
+            this.i = 0;
+            this.j = 0;
         },
     place: function (i, j) {
-        if (credits > 9) {
+        if (credits > 9 && map[i][j] !== -1 && map[i][j] !== 1) {
+            if (this.i !== 0 && this.j !== 0) {
+                map[this.i][this.j] = 0;
+            }
             this.y = i * 64 + 64 / 2;
             this.x = j * 64 + 64 / 2;
             map[i][j] = 1;
+            this.i = i;
+            this.j = j;
             credits -= 10;
         }
         else {
@@ -149,7 +159,6 @@ var Turret = new Phaser.Class({
         }
     }
 });
-
 var Bullet = new Phaser.Class({
 
     Extends: Phaser.GameObjects.Image,
@@ -293,5 +302,44 @@ function create() {
     pointsText = this.add.text(10, 10, 'Points: ' + credits, { fontSize: '24px', fill: '#ffffff' });
     levelText = this.add.text(10, 40, 'Level: ' + level, { fontSize: '24px', fill: '#ffffff' }); // Display current level
 
+    sellKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this.input.on('pointerdown', handlePointerDown, this);
+
     increaseDifficulty();
+}
+
+function handlePointerDown(pointer) {
+    if (sellKey.isDown) {
+        // Check if the clicked position overlaps with a turret
+        const clickedTurret = getClickedTurret(pointer.x, pointer.y);
+        if (clickedTurret) {
+            sellTurret(clickedTurret);
+        }
+    }
+}
+
+function getClickedTurret(x, y) {
+    const turretArray = turrets.getChildren();
+    for (let i = 0; i < turretArray.length; i++) {
+        const turret = turretArray[i];
+        if (turret.active && Phaser.Math.Distance.Between(x, y, turret.x, turret.y) < 32) {
+            return turret;
+        }
+    }
+    return null;
+}
+
+function sellTurret(turret) {
+    const i = Math.floor(turret.y / 64);
+    const j = Math.floor(turret.x / 64);
+
+    if (map[i][j] === 1) {
+        turret.setActive(false);
+        turret.setVisible(false);
+        map[i][j] = 0;
+
+        // Add the sell value to the player's credits
+        credits += 5; // Change the value as per your requirement
+        pointsText.setText('Points: ' + credits);
+    }
 }
